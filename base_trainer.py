@@ -5,12 +5,15 @@ from tqdm import tqdm
 
 class Trainer:
     def __init__(self, model, criterion, optimizer, scheduler, use_gpu):
-        self.model = model
+
         self.criterion = criterion
         self.optimizer = optimizer
         self.scheduler = scheduler
         self.use_gpu = use_gpu
-
+        if self.use_gpu:
+            self.model = model.cuda()
+        else:
+            self.model = model
     def train(self, epochs, train_loader, valid_loader, save_path):
         self.model.train()
 
