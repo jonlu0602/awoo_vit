@@ -17,12 +17,21 @@ from model import ViT
 from base_data_loader import CustomDataset
 from base_trainer import Trainer
 
+import argparse
+
+
 from pdb import set_trace as st
 
 def label2str(label):
     label_map = {0: 'plane', 1: 'car', 2: 'bird', 3: 'cat',
            4: 'deer', 5: 'dog', 6: 'frog', 7: 'horse', 8: 'ship', 9:'truck'}
     return label_map[label]
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--gpu", help="setting using gpu",
+                    action="store_true")
+args = parser.parse_args()
+use_gpu = args.gpu
 
 
 transform = transforms.Compose(
@@ -89,7 +98,8 @@ optimizer = optim.Adam(model.parameters(), lr=lr)
 # scheduler
 scheduler = StepLR(optimizer, step_size=1, gamma=gamma)
 
-trainer = Trainer(model, criterion, optimizer, scheduler)
+## training
+trainer = Trainer(model, criterion, optimizer, scheduler, use_gpu)
 trainer.train(epochs, train_loader, valid_loader, save_path)
 
 ## inference
@@ -97,8 +107,12 @@ trainer.train(epochs, train_loader, valid_loader, save_path)
 model.load_state_dict(torch.load(save_path))
 
 for data, label in tqdm(test_loader):
-    data = data
-    label = label
+    if use_gpu:
+        data = data.cuda()
+        label = label.cuda()
+    else:
+        data = data
+        label = label    
 
     infer_output = model(data)
     pred_label = infer_output.argmax(dim=1)

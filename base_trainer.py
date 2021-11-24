@@ -4,11 +4,12 @@ import torch
 from tqdm import tqdm
 
 class Trainer:
-    def __init__(self, model, criterion, optimizer, scheduler):
+    def __init__(self, model, criterion, optimizer, scheduler, use_gpu):
         self.model = model
         self.criterion = criterion
         self.optimizer = optimizer
         self.scheduler = scheduler
+        self.use_gpu = use_gpu
 
     def train(self, epochs, train_loader, valid_loader, save_path):
         self.model.train()
@@ -18,8 +19,12 @@ class Trainer:
             epoch_accuracy = 0
 
             for data, label in tqdm(train_loader):
-                data = data
-                label = label
+                if self.use_gpu:
+                    data = data.cuda()
+                    label = label.cuda()
+                else:
+                    data = data
+                    label = label                   
 
                 output = self.model(data)
                 loss = self.criterion(output, label)
@@ -41,8 +46,12 @@ class Trainer:
             epoch_val_accuracy = 0
             epoch_val_loss = 0
             for data, label in tqdm(valid_loader):
-                data = data
-                label = label
+                if self.use_gpu:
+                    data = data.cuda()
+                    label = label.cuda()
+                else:
+                    data = data
+                    label = label
 
                 val_output = self.model(data)
                 val_loss = self.criterion(val_output, label)
@@ -50,4 +59,4 @@ class Trainer:
                 acc = (val_output.argmax(dim=1) == label).float().mean()
                 epoch_val_accuracy += acc / len(valid_loader)
                 epoch_val_loss += val_loss / len(valid_loader)
-            print(f"Epoch : {epoch+1} - val_loss : {epoch_val_loss:.4f} - val_acc: {epoch_val_accuracy:.4f}\n")
+            print(f"- val_loss : {epoch_val_loss:.4f} - val_acc: {epoch_val_accuracy:.4f}\n")
