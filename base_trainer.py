@@ -4,13 +4,14 @@ import matplotlib.pyplot as plt
 
 from tqdm import tqdm
 
-def draw_result(loss, acc, file_name):
-    plt.plot(range(len(loss)), loss, '-b', label='loss')
-    plt.plot(range(len(acc)), acc, '-r', label='accuracy')
+def draw_result(curve_list1, curve_list2, file_name):
+    plt.plot(range(len(curve_list1)), curve_list1, '-b', label='train')
+    plt.plot(range(len(curve_list2)), curve_list2, '-r', label='val')
     plt.xlabel("n iteration")
     plt.legend(loc='upper left')
     plt.title(file_name.split('.')[0])
     plt.savefig(file_name)
+    plt.clf()
 
 class Trainer:
     def __init__(self, model, criterion, optimizer, scheduler, use_gpu):
@@ -34,8 +35,11 @@ class Trainer:
         for epoch in range(epochs):
             epoch_loss = 0
             epoch_accuracy = 0
-
+            count = 0
             for data, label in tqdm(train_loader):
+                count += 1
+                if count == 10:
+                  break
                 if self.use_gpu:
                     data = data.cuda()
                     label = label.cuda()
@@ -54,25 +58,29 @@ class Trainer:
                 epoch_accuracy += acc / len(train_loader)
                 epoch_loss += loss / len(train_loader)
             print(f"Epoch : {epoch+1} - loss : {epoch_loss:.4f} - acc: {epoch_accuracy:.4f}\n")
-            if epoch % 5 == 0:
+            if epoch % 1 == 0:
                 epoch_val_loss, epoch_val_accuracy = self.val(valid_loader)
                 if epoch_val_accuracy > max_val_acc:
                     print('model saved !!!')
                     torch.save(self.model.state_dict(), save_path)
-                val_loss.append(epoch_loss)
-                val_acc.append(epoch_accuracy)
+                val_loss.append(epoch_val_loss)
+                val_acc.append(epoch_val_accuracy)
             train_loss.append(epoch_loss)
             train_acc.append(epoch_accuracy)
         ## draw images
-        draw_result(train_loss, train_acc, 'train_curve.png')
-        draw_result(val_loss, val_acc, 'train_curve.png')
+        draw_result(train_loss, val_loss, 'val_curve.png')
+        draw_result(train_acc, val_acc, 'acc_curve.png')
         
 
     def val(self, valid_loader):
         with torch.no_grad():
             epoch_val_accuracy = 0
             epoch_val_loss = 0
+            count = 0
             for data, label in tqdm(valid_loader):
+                count += 1
+                if count == 10:
+                  break
                 if self.use_gpu:
                     data = data.cuda()
                     label = label.cuda()

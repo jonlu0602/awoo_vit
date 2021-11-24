@@ -75,7 +75,7 @@ print('Test dataset:', len(test_dataset))
 ## define Model
 model = ViT(
     image_size=224,
-    patch_size=32,
+    patch_size=16,
     dim=128,
     num_classes=10,
     channels=3,
@@ -88,7 +88,7 @@ model = ViT(
 
 ## setting Training parameters
 save_path = './model.pt'
-epochs = 1
+epochs = 2
 lr = 3e-5
 gamma = 0.7
 # loss function
@@ -102,19 +102,20 @@ scheduler = StepLR(optimizer, step_size=1, gamma=gamma)
 trainer = Trainer(model, criterion, optimizer, scheduler, use_gpu)
 trainer.train(epochs, train_loader, valid_loader, save_path)
 
-## inference
-# load model
-model.load_state_dict(torch.load(save_path))
+# ## inference
+# # load model
+# model.load_state_dict(torch.load(save_path, map_location=torch.device('cpu')))
 
-for data, label in tqdm(test_loader):
-    if use_gpu:
-        data = data.cuda()
-        label = label.cuda()
-    else:
-        data = data
-        label = label    
+# for data, label in tqdm(test_loader):
+#     if use_gpu:
+#         data = data.cuda()
+#         label = label.cuda()
+#     else:
+#         data = data
+#         label = label    
 
-    infer_output = model(data)
-    pred_label = infer_output.argmax(dim=1)
-    print('Ground Truth:', label2str(int(label)))
-    print('Predict:', label2str(int(pred_label)))
+#     infer_output = model(data)
+#     pred_label = infer_output.argmax(dim=1)
+#     print('Ground Truth:', label2str(int(label)))
+#     print('Predict:', label2str(int(pred_label)))
+#     st()
