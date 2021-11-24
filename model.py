@@ -4,6 +4,8 @@ from torch import nn
 from einops import rearrange, repeat
 from einops.layers.torch import Rearrange
 
+from pdb import set_trace as st
+
 # helpers
 
 def pair(t):
@@ -53,6 +55,7 @@ class Attention(nn.Module):
         qkv = self.to_qkv(x).chunk(3, dim = -1)
         q, k, v = map(lambda t: rearrange(t, 'b n (h d) -> b h n d', h = self.heads), qkv)
 
+        ## multi-head attention
         dots = torch.matmul(q, k.transpose(-1, -2)) * self.scale
 
         attn = self.attend(dots)
@@ -77,6 +80,14 @@ class Transformer(nn.Module):
         return x
 
 class ViT(nn.Module):
+    """
+    In order to implement ViT, we need to complete following steps:
+    1. split image into fixed-size patches
+    2. linearly embed each of them and add an extra learnable "classification token" to the sequence
+    3. add position embeddings
+    4. feed it to standard transformer
+    """
+
     def __init__(self, *, image_size, patch_size, num_classes, dim, depth, heads, mlp_dim, pool = 'cls', channels = 3, dim_head = 64, dropout = 0., emb_dropout = 0.):
         super().__init__()
         image_height, image_width = pair(image_size)
