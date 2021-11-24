@@ -1,7 +1,16 @@
 import numpy as np
 import torch
+import matplotlib.pyplot as plt
 
 from tqdm import tqdm
+
+def draw_result(loss, acc, file_name):
+    plt.plot(range(len(loss)), loss, '-b', label='loss')
+    plt.plot(range(len(acc)), acc, '-r', label='accuracy')
+    plt.xlabel("n iteration")
+    plt.legend(loc='upper left')
+    plt.title(file_name.split('.')[0])
+    plt.savefig(file_name)
 
 class Trainer:
     def __init__(self, model, criterion, optimizer, scheduler, use_gpu):
@@ -17,6 +26,10 @@ class Trainer:
     def train(self, epochs, train_loader, valid_loader, save_path):
         self.model.train()
         max_val_acc = 0
+        train_loss = []
+        train_acc = []
+        val_loss = []
+        val_acc = []
 
         for epoch in range(epochs):
             epoch_loss = 0
@@ -41,10 +54,18 @@ class Trainer:
                 epoch_accuracy += acc / len(train_loader)
                 epoch_loss += loss / len(train_loader)
             print(f"Epoch : {epoch+1} - loss : {epoch_loss:.4f} - acc: {epoch_accuracy:.4f}\n")
-            if epoch % 1 == 0:
-                epoch_val_accuracy = self.val(valid_loader)
+            if epoch % 5 == 0:
+                epoch_val_loss, epoch_val_accuracy = self.val(valid_loader)
                 if epoch_val_accuracy > max_val_acc:
-                    self.model.save(self.model.state_dict(), save_path)
+                    print('model saved !!!')
+                    torch.save(self.model.state_dict(), save_path)
+                val_loss.append(epoch_loss)
+                val_acc.append(epoch_accuracy)
+            train_loss.append(epoch_loss)
+            train_acc.append(epoch_accuracy)
+        ## draw images
+        draw_result(train_loss, train_acc, 'train_curve.png')
+        draw_result(val_loss, val_acc, 'train_curve.png')
         
 
     def val(self, valid_loader):
@@ -66,4 +87,4 @@ class Trainer:
                 epoch_val_accuracy += acc / len(valid_loader)
                 epoch_val_loss += val_loss / len(valid_loader)
             print(f"- val_loss : {epoch_val_loss:.4f} - val_acc: {epoch_val_accuracy:.4f}\n")
-        return epoch_val_accuracy
+        return epoch_val_loss, epoch_val_accuracy
