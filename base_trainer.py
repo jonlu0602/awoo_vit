@@ -16,6 +16,7 @@ class Trainer:
             self.model = model
     def train(self, epochs, train_loader, valid_loader, save_path):
         self.model.train()
+        max_val_acc = 0
 
         for epoch in range(epochs):
             epoch_loss = 0
@@ -41,8 +42,10 @@ class Trainer:
                 epoch_loss += loss / len(train_loader)
             print(f"Epoch : {epoch+1} - loss : {epoch_loss:.4f} - acc: {epoch_accuracy:.4f}\n")
             if epoch % 1 == 0:
-              self.val(valid_loader)
-        model.save(self.model.state_dict(), save_path)
+                epoch_val_accuracy = self.val(valid_loader)
+                if epoch_val_accuracy > max_val_acc:
+                    self.model.save(self.model.state_dict(), save_path)
+        
 
     def val(self, valid_loader):
         with torch.no_grad():
@@ -63,3 +66,4 @@ class Trainer:
                 epoch_val_accuracy += acc / len(valid_loader)
                 epoch_val_loss += val_loss / len(valid_loader)
             print(f"- val_loss : {epoch_val_loss:.4f} - val_acc: {epoch_val_accuracy:.4f}\n")
+        return epoch_val_accuracy
