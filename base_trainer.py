@@ -3,6 +3,7 @@ import torch
 import matplotlib.pyplot as plt
 
 from tqdm import tqdm
+from pdb import set_trace as st
 
 def draw_result(curve_list1, curve_list2, file_name):
     plt.plot(range(len(curve_list1)), curve_list1, '-b', label='train')
@@ -12,6 +13,8 @@ def draw_result(curve_list1, curve_list2, file_name):
     plt.title(file_name.split('.')[0])
     plt.savefig(file_name)
     plt.clf()
+
+
 
 class Trainer:
     def __init__(self, model, criterion, optimizer, scheduler, use_gpu):
@@ -37,9 +40,9 @@ class Trainer:
             epoch_accuracy = 0
             count = 0
             for data, label in tqdm(train_loader):
-                count += 1
-                if count == 10:
-                  break
+                # count += 1
+                # if count == 100:
+                #   break
                 if self.use_gpu:
                     data = data.cuda()
                     label = label.cuda()
@@ -62,7 +65,7 @@ class Trainer:
                 epoch_val_loss, epoch_val_accuracy = self.val(valid_loader)
                 if epoch_val_accuracy > max_val_acc:
                     print('model saved !!!')
-                    torch.save(self.model.state_dict(), save_path)
+                    # torch.save(self.model.state_dict(), save_path)
                 val_loss.append(epoch_val_loss)
                 val_acc.append(epoch_val_accuracy)
             train_loss.append(epoch_loss)
@@ -78,9 +81,9 @@ class Trainer:
             epoch_val_loss = 0
             count = 0
             for data, label in tqdm(valid_loader):
-                count += 1
-                if count == 10:
-                  break
+                # count += 1
+                # if count == 10:
+                #   break
                 if self.use_gpu:
                     data = data.cuda()
                     label = label.cuda()

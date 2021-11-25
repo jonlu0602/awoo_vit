@@ -58,6 +58,7 @@ class Attention(nn.Module):
         ## multi-head attention
         dots = torch.matmul(q, k.transpose(-1, -2)) * self.scale
 
+        ## 1-d 
         attn = self.attend(dots)
 
         out = torch.matmul(attn, v)
@@ -71,7 +72,7 @@ class Transformer(nn.Module):
         for _ in range(depth):
             self.layers.append(nn.ModuleList([
                 PreNorm(dim, Attention(dim, heads = heads, dim_head = dim_head, dropout = dropout)),
-                PreNorm(dim, FeedForward(dim, mlp_dim, dropout = dropout))
+                PreNorm(dim, FeedForward(dim, mlp_dim, dropout = dropout)),
             ]))
     def forward(self, x):
         for attn, ff in self.layers:
