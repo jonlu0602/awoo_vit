@@ -52,7 +52,7 @@ class FocalLoss(nn.Module):
 
         loss = focal_term * ce
 
-        return loss.mean
+        return loss.mean()
     
 
 parser = argparse.ArgumentParser()

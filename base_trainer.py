@@ -65,7 +65,7 @@ class Trainer:
                 epoch_val_loss, epoch_val_accuracy = self.val(valid_loader)
                 if epoch_val_accuracy > max_val_acc:
                     print('model saved !!!')
-                    # torch.save(self.model.state_dict(), save_path)
+                    torch.save(self.model.state_dict(), save_path)
                 val_loss.append(epoch_val_loss)
                 val_acc.append(epoch_val_accuracy)
             train_loss.append(epoch_loss)
